@@ -26,7 +26,7 @@ def save_word_list(start_date, days, root_path):
             word_list = get_paticle_words(part.get('text'))
             if (judge_relativeness(word_list)):
                 new = " ".join(word_list)
-                corpus.append({"title": title, "word_list": new})
+                corpus.append({"label": "", "title": title, "word_list": new})
         filename = 'word_list' + '/' + root_path + '/' + date + ".json"
         with open(filename, 'w+', encoding='utf-8') as f:
             json.dump(corpus, f, ensure_ascii=False, indent=4)
@@ -37,7 +37,7 @@ def save_word_list(start_date, days, root_path):
 if __name__ == '__main__':
     # start_date: 开始日期      格式：YYYY-MM-DD
     # days      : 天数          int
-    start_date = '2019-12-08'
-    days = 1
+    start_date = '2020-02-01'
+    days = 5
     root_path = 'sina_news'
     save_word_list(start_date, days, root_path)
