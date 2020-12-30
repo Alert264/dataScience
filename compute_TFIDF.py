@@ -18,7 +18,8 @@ def get_stopwords_list(stop_words_file_name):
 def move_stopwords(sentence_list, stopwords_list):
     out_list = []
     for index, word in enumerate(sentence_list):
-        if word == '新' and sentence_list[index + 1] == '冠':
+
+        if word == '新' and index+1 < len(sentence_list) and sentence_list[index + 1] == '冠':
             word = '新冠'
             sentence_list[index + 1] = ''
         elif word not in stopwords_list:
