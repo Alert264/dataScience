@@ -31,7 +31,9 @@ def save_word_list(start_date, days, root_path):
         with open(filename, 'w+', encoding='utf-8') as f:
             json.dump(corpus, f, ensure_ascii=False, indent=4)
         print("[" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + "]:" + date + ": 写入分词完成。")
-    print("[" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + "]:" + "从" + str(start_date) + "开始，共" + str(days) + "天的分词完成")
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + "]:" + "从" + str(
+        start_date) + "开始，共" + str(days) + "天的分词完成")
+
 
 def save_word_list_comment(start_date, days, root_path):
     for i in range(days):
@@ -47,23 +49,25 @@ def save_word_list_comment(start_date, days, root_path):
         for part in data:
             new = ""
             title = part.get('微博内容')
+            count = part.get('评论数量')
             reviewList = part.get('评论')
             for review in reviewList:
                 word_list += get_paticle_words(review)
 
             new = " ".join(word_list)
-            corpus.append({"label": "", "title": title, "word_list": new})
+            corpus.append({"label": "", "title": title, "count": count, "word_list": new})
         filename = 'word_list' + '/' + root_path + '/' + date + ".json"
         with open(filename, 'w+', encoding='utf-8') as f:
             json.dump(corpus, f, ensure_ascii=False, indent=4)
         print("[" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + "]:" + date + ": 写入分词完成。")
     print("[" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + "]:" + "从" + str(
         start_date) + "开始，共" + str(days) + "天的分词完成")
+
+
 if __name__ == '__main__':
     # start_date: 开始日期      格式：YYYY-MM-DD
     # days      : 天数          int
-    start_date = '2020-06-30'
+    start_date = '2019-12-08'
     days = 1
     root_path = 'weibo_comments'
     save_word_list_comment(start_date, days, root_path)
-
