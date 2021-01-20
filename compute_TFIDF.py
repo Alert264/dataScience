@@ -52,15 +52,14 @@ def judge_relativeness(words,relative_words_file='relative_words.txt'):
     return False
 
 
-def compute_TFIDF(start_date, days,relative_words_file='relative_words.txt',stop_words_file_name='cn_stopwords.txt',mode='sina_news',file_title='tfidf_source'):
+def compute_TFIDF(start_date, days,relative_words_file='relative_words.txt',stop_words_file_name='cn_stopwords.txt',mode='sina_news',file_title='tfidf_source',n = 20):
     for i in range(days):
         date = int_to_date(date_to_int(start_date) + 86400 * i)
-        save_IDF(date,relative_words_file,stop_words_file_name,mode,file_title)
-    print("从" + str(start_date) + "开始，共" + str(days) + "天的TF*IDF记录完成"+"----"+file_title)
+        save_IDF(date,relative_words_file,stop_words_file_name,mode,file_title,n)
+    print("从" + str(start_date) + "开始，共" + str(days) + "天的关键词记录完成."+"保存在："+file_title)
 
 
-def save_IDF(date,relative_words_file='relative_words.txt',stop_words_file_name='cn_stopwords',mode='sina_news',file_title='tfidf_source'):
-    print(sys.path[0])
+def save_IDF(date,relative_words_file='relative_words.txt',stop_words_file_name='cn_stopwords',mode='sina_news',file_title='tfidf_source',n = 20):
     current = sys.path[0].replace('\\','/') + '/'
     corpus = []
     dic = {}
@@ -111,16 +110,31 @@ def save_IDF(date,relative_words_file='relative_words.txt',stop_words_file_name=
             if weight[i][j] != 0:
                 IDF[word[j]] = weight[i][j]
         IDF = dict(sorted(IDF.items(), key=operator.itemgetter(1), reverse=True))
-        tmp_dic["第" + str(i + 1) + "篇文章"] = IDF
-    dic["TF*IDF"] = tmp_dic
+
+        tmp_dic["第" + str(i + 1) + "篇文章"] = order_dict(IDF,20)
+    dic["前"+str(n)+"个关键词"] = tmp_dic
     filename = fileTitle + '/' + date + ".json"
 
     with open(filename, 'w+', encoding='utf-8') as f:
         json.dump(dic, f, ensure_ascii=False, indent=4)
 
     f.close()
-    print(date + ":"+ file_title+ "写入TF*IDF完成。")
+    print(date + ":"+ "写入关键词完成。")
 
+def order_dict(dicts, n):
+    result = []
+    result1 = []
+    p = sorted([(k, v) for k, v in dicts.items()], reverse=True)
+    s = set()
+    for i in p:
+        s.add(i[1])
+    for i in sorted(s, reverse=True)[:n]:
+        for j in p:
+            if j[1] == i:
+                result.append(j)
+    for r in result:
+        result1.append(r[0])
+    return result1
 
 def date_to_int(date):
     timeArray = time.strptime(date, "%Y-%m-%d")
@@ -136,4 +150,5 @@ if __name__ == '__main__':
     # days      : 天数          int
     start_date = '2019-12-08'
     days = 1
-    compute_TFIDF(start_date, days,file_title="tfidf_comments",mode='weibo_comments')
+    # n为每篇文章保留的关键词数量
+    compute_TFIDF(start_date, days,file_title="tfidf_comments",mode='weibo_comments',n = 20)
