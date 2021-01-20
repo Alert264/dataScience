@@ -7,6 +7,7 @@ import time
 from lxml import html
 etree = html.etree
 import random_proxy_pool
+import winsound
 
 
 class Weibospider:
@@ -14,7 +15,13 @@ class Weibospider:
         # 获取首页的相关信息：
         # self.start_url = 'https://weibo.com/2803301701/Is5xeqvl1?from=page_1002062803301701_profile&wvr=6&mod=weibotime&type=comment#_rnd1608714031543'
         # self.start_url = 'https://weibo.com/rmrb?is_all=1&stat_date=201912&page={0}#1608738638854'
-        self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=2020' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page=0'
+        # 人民日报
+        # self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page=0'
+        # 央视新闻
+        self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page=0'
+        # 新浪新闻
+        # self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page=0'
+
         self.headers = {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
             "accept-encoding": "gzip, deflate, br",
@@ -39,11 +46,12 @@ class Weibospider:
         start = time.time()
         res = requests.get(url, headers=self.headers, proxies={'http': proxy})
         while time.time() - start > 5:
-            print("响应超时，重新获取")
+            print("[warning] 响应超时，重新获取")
             proxy = random_proxy_pool.get_quick_proxy()
             start = time.time()
             res = requests.get(url, headers=self.headers, proxies={'http': proxy})
         response = res.content.decode().replace("\\", "")
+
         # every_url = re.compile('target="_blank" href="(/\d+/\w+\?from=\w+&wvr=6&mod=weibotime)" rel="external nofollow" ', re.S).findall(response)
         every_id = re.compile('name=(\d+)', re.S).findall(response)  # 获取次级页面需要的id
         home_url = []
@@ -51,6 +59,18 @@ class Weibospider:
             base_url = 'https://weibo.com/aj/v6/comment/big?ajwvr=6&id={}&from=singleWeiBo'
             url = base_url.format(id)
             home_url.append(url)
+
+        count = 0
+        while len(home_url) == 0 and count < 3:
+            print("[warning] 第{0}次获取失败，重新获取".format(count + 1))
+            res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+            count = count + 1
+            response = res.content.decode().replace("\\", "")
+            every_id = re.compile(r'name=(\d{16})', re.S).findall(response)  # 获取次级页面需要的id
+            for id in every_id:
+                base_url = 'https://weibo.com/aj/v6/comment/big?ajwvr=6&id={}&from=singleWeiBo'
+                url = base_url.format(id)
+                home_url.append(url)
 
         res.encoding = res.apparent_encoding
         soup = BeautifulSoup(json.loads(res.text)["data"], "html.parser")
@@ -61,23 +81,46 @@ class Weibospider:
 
         times = re.compile('fromprofile"> (.*?)</a>').findall(response)  # 获取每条微博的时间
         dates = []
+        # for time_ in times:
+        #     month = time_.split("u6708")[0].zfill(2)
+        #     day = time_.split("u6708")[1].split("u65e5")[0].zfill(2)
+        #     dates.append("2020-" + month + "-" + day)
         for time_ in times:
-            month = time_.split("u6708")[0].zfill(2)
-            day = time_.split("u6708")[1].split("u65e5")[0].zfill(2)
-            dates.append("2020-" + month + "-" + day)
+            year = time_.split("-")[0]
+            month = time_.split("-")[1].zfill(2)
+            day = time_.split("-")[2].split(" ")[0].zfill(2)
+            dates.append(year + "-" + month + "-" + day)
         return dates, title_list, home_url
 
     def parse_comment_info(self, url):  # 爬取直接发表评论的人的相关信息(name,info,time,info_url)
+        start = time.time()
         proxy = random_proxy_pool.get_quick_proxy()
         res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+        if '"count":null' in res.text:
+            print(url)
+            res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+        while time.time() - start > 5:
+            print("[warning] 获取评论超时，重新获取")
+            start = time.time()
+            proxy = random_proxy_pool.get_quick_proxy()
+            res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+            if '"count":null' in res.text:
+                print(url)
+                res = requests.get(url, headers=self.headers, proxies={'http': proxy})
         response = res.json()
+        if '"count":null' in res.text:
+            print("[warning] 请检查该新闻是否有评论。")
+            print(url)
+            print(res.text)
+            beep(2)
+            return 0, []
         count = response['data']['count']
         while count is None:
             print("[error]   获取评论出错!!!重新获取。")
             proxy = random_proxy_pool.get_quick_proxy()
             res = requests.get(url, headers=self.headers, proxies={'http': proxy})
-            response = res.json()
-            count = response['data']['count']
+        response = res.json()
+        count = response['data']['count']
         html = etree.HTML(response['data']['html'])
         name = html.xpath("//div[@class='list_li S_line1 clearfix']/div[@class='WB_face W_fl']/a/img/@alt")  # 评论人的姓名
         info = html.xpath("//div[@node-type='replywrap']/div[@class='WB_text']/text()")  # 评论信息
@@ -110,15 +153,23 @@ class Weibospider:
 
     def run(self):
         start_url = self.start_url
-        start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=2020{1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page={0}'
-        start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=2020{1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page={0}'
-        i = 33
+        # 人民日报
+        # start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page={0}'
+        # start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page={0}'
+        # 央视新闻
+        start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page={0}'
+        start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page={0}'
+        # 新浪新闻
+        # start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
+        # start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
+
+        i = 7  # 页数-1
         while True:
             i += 1
             print("[info]    获取第 " + str(i) + " 页微博。")
             dates_1, titles_1, home_url = self.parse_home_url(start_url.format(i, self.date))  # 获取每一页的微博
             if len(home_url) == 0:
-                print("[waring] 最后一页是：第 " + str(i-1) + " 页")
+                print("[warning] 最后一页是：第 " + str(i-1) + " 页")
                 break
             dates_2, titles_2, ajax_url1 = self.parse_home_url(start_ajax_url1.format(i, self.date))  # ajax加载页面的微博
             dates_3, titles_3, ajax_url2 = self.parse_home_url(start_ajax_url2.format(i, self.date))  # ajax第二页加载页面的微博
@@ -127,17 +178,30 @@ class Weibospider:
             # print(all_dates)
             all_titles = titles_1 + titles_2 + titles_3
 
-            for j in range(len(all_url)):
-                print("[info]    获取第 " + str(i) + " 页第 " + str((i-1) * 45 + j + 1) + " 条微博的评论。")
+            if len(all_url) != len(all_dates) or len(all_titles) != len(all_dates) or len(all_url) != len(all_titles):
+                print("[error]   各数组长度不一致。")
+                print(len(all_url))
+                print(len(all_titles))
+                print(len(all_dates))
+                beep(3)
+                return
+            #
+            # print(all_url)
+            # print(all_titles)
+            # print(all_dates)
+
+            for j in range(0, len(all_url)):
+                print("[info]    获取第 " + str(i) + " 页第" + str(j + 1) + "条，总第 " + str((i-1) * 45 + j + 1) + " 条微博的评论。")
                 # print(all_url[j])
-                path_name = "source\\weibo_comments\\{0}.json".format(all_dates[j])
-                print("[info]    获取第 " + str(i) + " 页第" + str(j + 1) + "条，总第 " + str((i - 1) * 45 + j + 1) + " 条微博第 1 页的评论。")
+                path_name = "source/ysxw/{0}.json".format(all_dates[j])
+                # path_name = "temp/{0}.json".format(all_dates[j])
+                print("[info]    获取第 " + str(i) + " 页第" + str(j + 1) + "条，总第 " + str((i - 1) * 45 + j + 1) + " 条微博第 1 页的评论。", end="")
                 all_count, comment_info_list = self.parse_comment_info(all_url[j])
                 # self.write_file(path_name, comment_info_list)
                 data = {"微博内容": all_titles[j], "评论数量": all_count, "评论": comment_info_list}
                 # print(data)
                 for num in range(1, 20):
-                    print("[info]    获取第 " + str(i) + " 页第" + str(j + 1) + "条，总第 " + str((i - 1) * 45 + j + 1) + " 条微博第 " + str(num + 1) + " 页的评论。")
+                    print("\r[info]    获取第 " + str(i) + " 页第" + str(j + 1) + "条，总第 " + str((i - 1) * 45 + j + 1) + " 条微博第 " + str(num + 1) + " 页的评论。", end="")
                     if num * 15 < int(all_count) + 15:
                         comment_url = all_url[j] + "&page={}".format(num + 1)
                         # print(comment_url)
@@ -157,12 +221,21 @@ class Weibospider:
                         time.sleep(0.2)
                         # print(data)
                 self.write_file(path_name, data)
-                print("[info]    第{}条微博信息获取完成！写入文件:".format((i-1) * 45 + j + 1) + path_name)
+                print("\n[info]    第{}条微博信息获取完成！写入文件:".format((i-1) * 45 + j + 1) + path_name)
                 # print("第{}条微博信息获取完成！".format((i-1) * 45 + j + 1))
             # break
 
 
+def beep(times):
+    for i in range(times):
+        winsound.Beep(1000, 700)
+        time.sleep(0.5)
+
+
 if __name__ == '__main__':
-    # for i in range(1, 3):
-    weibo = Weibospider("04")
-    weibo.run()
+        weibo = Weibospider("202002")
+        weibo.run()
+        beep(2)
+
+
+# 2020年1月到16页，下次从17页开始爬
