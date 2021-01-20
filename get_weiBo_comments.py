@@ -53,7 +53,7 @@ class Weibospider:
         response = res.content.decode().replace("\\", "")
 
         # every_url = re.compile('target="_blank" href="(/\d+/\w+\?from=\w+&wvr=6&mod=weibotime)" rel="external nofollow" ', re.S).findall(response)
-        every_id = re.compile('name=(\d+)', re.S).findall(response)  # 获取次级页面需要的id
+        every_id = re.compile('name=(\d{16})', re.S).findall(response)  # 获取次级页面需要的id
         home_url = []
         for id in every_id:
             base_url = 'https://weibo.com/aj/v6/comment/big?ajwvr=6&id={}&from=singleWeiBo'
@@ -163,7 +163,7 @@ class Weibospider:
         # start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
         # start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
 
-        i = 7  # 页数-1
+        i = 0  # 页数-1
         while True:
             i += 1
             print("[info]    获取第 " + str(i) + " 页微博。")
@@ -233,7 +233,7 @@ def beep(times):
 
 
 if __name__ == '__main__':
-        weibo = Weibospider("202002")
+        weibo = Weibospider("202006")
         weibo.run()
         beep(2)
 
