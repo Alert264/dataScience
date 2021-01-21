@@ -15,7 +15,7 @@ def int_to_date(integer):
 def save_word_list(start_date, days, root_path):
     for i in range(days):
         date = int_to_date(date_to_int(start_date) + 86400 * i)
-        print("[" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + "]:" + "正在分词：" + date)
+        print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]:" + "正在分词：" + date)
         corpus = []
         filename = 'source/' + root_path + '/' + date + ".json"
         with open(filename, 'r', encoding='utf-8') as File:
@@ -38,15 +38,15 @@ def save_word_list(start_date, days, root_path):
 def save_word_list_comment(start_date, days, root_path):
     for i in range(days):
         date = int_to_date(date_to_int(start_date) + 86400 * i)
-        print("[" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + "]:" + "正在分词：" + date)
+        print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]:" + "正在分词：" + date)
         corpus = []
         filename = 'source/' + root_path + '/' + date + ".json"
         with open(filename, 'r', encoding='utf-8') as File:
             data = json.load(File)
         File.close()
 
-        word_list = []
         for part in data:
+            word_list = []
             new = ""
             title = part.get('微博内容')
             count = part.get('评论数量')
@@ -68,6 +68,8 @@ if __name__ == '__main__':
     # start_date: 开始日期      格式：YYYY-MM-DD
     # days      : 天数          int
     start_date = '2019-12-08'
-    days = 1
-    root_path = 'weibo_comments'
+    days = 206
+    root_path = 'rmrb'
     save_word_list_comment(start_date, days, root_path)
+
+# 2020年5月下次获取第 33 页
