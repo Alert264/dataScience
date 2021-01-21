@@ -18,19 +18,20 @@ class Weibospider:
         # 人民日报
         # self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page=0'
         # 央视新闻
-        self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page=0'
+        # self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page=0'
         # 新浪新闻
-        # self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page=0'
+        self.start_url = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date=' + date + '&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page=0'
 
         self.headers = {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
             "accept-encoding": "gzip, deflate, br",
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
             "cache-control": "max-age=0",
-            "cookie": '_ga=GA1.2.251401487.1603990360; _s_tentry=-; Apache=6459632317051.233.1608711051353; SINAGLOBAL=6459632317051.233.1608711051353; ULV=1608711051359:1:1:1:6459632317051.233.1608711051353:; login_sid_t=836768862393a5ea300038c4609f06ba; cross_origin_proto=SSL; SSOLoginState=1608712142; SUB=_2A25y5o-BDeRhGeNI71MT9SnOzD2IHXVuKBHJrDV8PUJbkNAfLRemkW1NSGU_PxQfFB3h56wBChPxrQ09qdGb_SO4; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhSxjHssiu67T8-eFN2ZgH95NHD95QfSoBpeo-NeoMpWs4DqcjGHcL.9-v79Btt; wvr=6; wb_view_log_5641257271=1440*9001.600000023841858; UOR=,,graph.qq.com; webim_unReadCount=%7B%22time%22%3A1608713178777%2C%22dm_pub_total%22%3A0%2C%22chat_group_client%22%3A0%2C%22chat_group_notice%22%3A0%2C%22allcountNum%22%3A37%2C%22msgbox%22%3A0%7D',
+            # "cookie": '_ga=GA1.2.251401487.1603990360; _s_tentry=-; Apache=6459632317051.233.1608711051353; SINAGLOBAL=6459632317051.233.1608711051353; ULV=1608711051359:1:1:1:6459632317051.233.1608711051353:; login_sid_t=836768862393a5ea300038c4609f06ba; cross_origin_proto=SSL; SSOLoginState=1608712142; SUB=_2A25y5o-BDeRhGeNI71MT9SnOzD2IHXVuKBHJrDV8PUJbkNAfLRemkW1NSGU_PxQfFB3h56wBChPxrQ09qdGb_SO4; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhSxjHssiu67T8-eFN2ZgH95NHD95QfSoBpeo-NeoMpWs4DqcjGHcL.9-v79Btt; wvr=6; wb_view_log_5641257271=1440*9001.600000023841858; UOR=,,graph.qq.com; webim_unReadCount=%7B%22time%22%3A1608713178777%2C%22dm_pub_total%22%3A0%2C%22chat_group_client%22%3A0%2C%22chat_group_notice%22%3A0%2C%22allcountNum%22%3A37%2C%22msgbox%22%3A0%7D',
+            "cookie": 'SINAGLOBAL=6231556531733.056.1588128770990; _ga=GA1.2.958850115.1607182656; UM_distinctid=1765c20c5e96aa-09b5b8fb4e915d-930346c-144000-1765c20c5ea518; _s_tentry=login.sina.com.cn; Apache=4789115122888.512.1611039342080; ULV=1611039342321:15:1:1:4789115122888.512.1611039342080:1609424214640; login_sid_t=61cc70fad967187ac88cb6720aa5a2a2; cross_origin_proto=SSL; UOR=,,login.sina.com.cn; SSOLoginState=1611112413; wvr=6; wb_view_log_5715604584=1536*8641.25; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhzI8YFvNo.8GUaj2GrDIlj5JpX5KMhUgL.Fo-NeK-cehBf1hB2dJLoIXzLxKnLBo-LBoMLxKBLBonLB-2LxK-L1K5L12BLxK-LB-BL1KMLxK-LBK-LB.BLxK.L1-2LB.-LxK-L1K-L122ESoBt; ALF=1642735195; SCF=AlB5cnq7q8EgwK56rx6GguAFhcbJSfuZSFx80QoUcPRXzhrfo_jR9YkhLAJ-nFb5fzl7QEsBITd6IzQuvPSt3Qo.; SUB=_2A25NDIKNDeRhGeNJ6lcX8CrJwziIHXVue_NFrDV8PUNbmtAKLRfykW9NS-Qk9xtMUcxLWh6I6y-BG91Q4IAz3oi3; webim_unReadCount=%7B%22time%22%3A1611199487322%2C%22dm_pub_total%22%3A0%2C%22chat_group_client%22%3A0%2C%22chat_group_notice%22%3A0%2C%22allcountNum%22%3A0%2C%22msgbox%22%3A2%7D',
             "referer": "https://www.weibo.com/u/5644764907?topnav=1&wvr=6&topsug=1",
             "upgrade-insecure-requests": "1",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.96 Safari/537.36",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36",
         }
         self.date = date
         # self.proxy = {
@@ -50,6 +51,8 @@ class Weibospider:
             proxy = random_proxy_pool.get_quick_proxy()
             start = time.time()
             res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+        # res.encoding = res.apparent_encoding
+        # print(res.text)
         response = res.content.decode().replace("\\", "")
 
         # every_url = re.compile('target="_blank" href="(/\d+/\w+\?from=\w+&wvr=6&mod=weibotime)" rel="external nofollow" ', re.S).findall(response)
@@ -61,7 +64,7 @@ class Weibospider:
             home_url.append(url)
 
         count = 0
-        while len(home_url) == 0 and count < 3:
+        while len(home_url) == 0 and count < 5:
             print("[warning] 第{0}次获取失败，重新获取".format(count + 1))
             res = requests.get(url, headers=self.headers, proxies={'http': proxy})
             count = count + 1
@@ -107,6 +110,22 @@ class Weibospider:
             if '"count":null' in res.text:
                 print(url)
                 res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+            if '"count":null' in res.text:
+                print(url)
+                res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+        get_count = 0
+        while res is None:
+            print("[error]   获取评论出错!!!重新获取。", end="")
+            print("\r第{}次尝试...".format(get_count + 1), end="")
+
+            proxy = random_proxy_pool.get_quick_proxy()
+            res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+
+        while '"count":null' in res.text and get_count < 10:
+            get_count = get_count + 1
+            print(url)
+            res = requests.get(url, headers=self.headers, proxies={'http': proxy})
+
         response = res.json()
         if '"count":null' in res.text:
             print("[warning] 请检查该新闻是否有评论。")
@@ -157,14 +176,16 @@ class Weibospider:
         # start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page={0}'
         # start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__27&id=1002062803301701&script_uri=/rmrb&feed_type=0&pre_page={0}'
         # 央视新闻
-        start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page={0}'
-        start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page={0}'
+        # start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page={0}'
+        # start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__26&id=1002062656274875&script_uri=/cctvxinwen&feed_type=0&pre_page={0}'
         # 新浪新闻
-        # start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
-        # start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
+        start_ajax_url1 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=0&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
+        start_ajax_url2 = 'https://weibo.com/p/aj/v6/mblog/mbloglist?ajwvr=6&domain=100206&is_all=1&stat_date={1}&page={0}&pagebar=1&pl_name=Pl_Official_MyProfileFeed__26&id=1002062028810631&script_uri=/sinapapers&feed_type=0&pre_page={0}'
 
         i = 0  # 页数-1
         while True:
+            # if i == 4:
+            #     break
             i += 1
             print("[info]    获取第 " + str(i) + " 页微博。")
             dates_1, titles_1, home_url = self.parse_home_url(start_url.format(i, self.date))  # 获取每一页的微博
@@ -193,7 +214,7 @@ class Weibospider:
             for j in range(0, len(all_url)):
                 print("[info]    获取第 " + str(i) + " 页第" + str(j + 1) + "条，总第 " + str((i-1) * 45 + j + 1) + " 条微博的评论。")
                 # print(all_url[j])
-                path_name = "source/ysxw/{0}.json".format(all_dates[j])
+                path_name = "source/xlxw/{0}.json".format(all_dates[j])
                 # path_name = "temp/{0}.json".format(all_dates[j])
                 print("[info]    获取第 " + str(i) + " 页第" + str(j + 1) + "条，总第 " + str((i - 1) * 45 + j + 1) + " 条微博第 1 页的评论。", end="")
                 all_count, comment_info_list = self.parse_comment_info(all_url[j])
@@ -238,4 +259,4 @@ if __name__ == '__main__':
         beep(2)
 
 
-# 2020年1月到16页，下次从17页开始爬
+
