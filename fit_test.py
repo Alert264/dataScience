@@ -13,7 +13,6 @@ def divide_data(filesource='source/rmrb',gap=50,length=10000):
     for element in range(int(length/gap)+1):
         res.append(0)
     for filepath in filenames:
-        flag = True
         try:
             with open(filesource+'/'+filepath,encoding='utf-8') as f:
                 jsonData = json.load(f)
@@ -23,8 +22,7 @@ def divide_data(filesource='source/rmrb',gap=50,length=10000):
                     index = (int)(num/gap)
                     if index >limit:
                         left += 1
-
-                    if index < frontLimit:
+                    elif index <= limit:
                         front +=1
                         res[index] = res[index]+1
         except:
@@ -34,7 +32,7 @@ def divide_data(filesource='source/rmrb',gap=50,length=10000):
     x=[]
     for element in range(0,limit+1):
         x.append(element * gap)
-    print(sum(res))
+    print(front)
 
     plot.plot(x,res)
     plot.show()
@@ -47,4 +45,4 @@ def divide_data(filesource='source/rmrb',gap=50,length=10000):
 
 
 if __name__ == '__main__':
-    divide_data('source/rmrb',150)
+    divide_data('source/ysxw',110)
