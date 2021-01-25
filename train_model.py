@@ -22,14 +22,15 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import mean_squared_error
 import lightgbm as lightgbm
 import xgboost
+import data_visualization
 
 warnings.filterwarnings('ignore')
 
-num_to_label = {0: '满意', 1: '自豪', 2: '平静', 3: '高兴', 4: '恐惧', 5: '忧愁', 6: '疑惑', 7: '同情', 8: '羡慕', 9: '惊讶', 10: '愤怒',
-                11: '喜爱', 12: '悲哀', 13: '感动', 14: '期望', 15: "着急", -1: ""}
+num_to_label = {0: '自豪', 1: '平静', 2: '高兴', 3: '恐惧', 4: '忧愁', 5: '疑惑', 6: '同情', 7: '愤怒',
+                8: '喜爱', 9: '悲哀', 10: '感动', 11: '期望', 12: "着急", 13: '满意', 14: '羡慕', 15: '惊讶', -1: ""}
 
-label_to_num = {'满意': 0, '自豪': 1, '平静': 2, '高兴': 3, '恐惧': 4, '忧愁': 5, '疑惑': 6, '同情': 7, '羡慕': 8, '惊讶': 9, '愤怒': 10,
-                '喜爱': 11, '悲哀': 12, '感动': 13, '期望': 14, "着急": 15, "": -1}
+label_to_num = {'自豪': 0, '平静': 1, '高兴': 2, '恐惧': 3, '忧愁': 4, '疑惑': 5, '同情': 6, '愤怒': 7,
+                '喜爱': 8, '悲哀': 9, '感动': 10, '期望': 11, "着急": 12, '满意': 13, '羡慕': 14, '惊讶': 15, "": -1}
 
 
 def read_text(filepath):
@@ -73,7 +74,7 @@ def merge_text(train_or_test_path):
         features, labels = read_text(train_or_test_path + "/" + file)
         merge_features += features
         merge_labels += labels
-    print("[info]: 样本数量：" + str(len(merge_labels)))
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 样本数量：" + str(len(merge_labels)))
     return merge_features, merge_labels
 
 
@@ -110,7 +111,7 @@ def convert_to_matrix(train_path, test_path, predict_path):
 # estimator_list, score_list, time_list = [], [], []
 
 
-def get_text_classification(estimator, X, y, X_test, y_test):
+def get_text_classification(estimator, X, y, X_test, y_test, saveModel=True):
     """
     :param estimator: 分类器，必选参数
     :param X: 特征训练数据，必选参数
@@ -120,33 +121,36 @@ def get_text_classification(estimator, X, y, X_test, y_test):
     :return
        y_pred_model: 预测值
          classifier: 分类器名字
-              score: 准确率
+              test_score: 测试集得分
+              train_score: 训练集得分
                   t: 消耗的时间
               matrix: 混淆矩阵
               report: 分类评价函数
     """
     start = time.time()
-
-    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '算法正在启动，请稍候...')
     model = estimator
 
-    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '算法正在进行训练，请稍候...')
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '正在进行训练模型，请稍候...')
     model.fit(X, y)
-    print("model/" + str(round(time.time() * 1000)) + "-" + str(model).split('(')[0] + ".m")
     print(model)
 
-    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '算法正在进行预测，请稍候...')
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '正在进行预测，请稍候...')
     y_pred_model = model.predict(X_test)
+    y_train_pred = model.predict(X)
     print(y_pred_model)
 
-    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '算法正在进行性能评估，请稍候...')
-    score = metrics.accuracy_score(y_test, y_pred_model)
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '正在进行性能评估，请稍候...')
+    test_score = metrics.accuracy_score(y_test, y_pred_model)
+    train_score = metrics.accuracy_score(y, y_train_pred)
+
     matrix = metrics.confusion_matrix(y_test, y_pred_model)
     report = metrics.classification_report(y_test, y_pred_model)
 
-    save_model(model, score)
+    if saveModel:
+        save_model(model, test_score)
 
-    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '准确率: ', score)
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '准确率: ', test_score)
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '训练集得分：: ', train_score)
     print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '混淆矩阵\n', matrix)
     print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '召回率\n', report)
     print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '算法程序已经结束...')
@@ -156,23 +160,26 @@ def get_text_classification(estimator, X, y, X_test, y_test):
     print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: " + '算法消耗时间为：', t, '秒\n')
     classifier = str(model).split('(')[0]
 
-    return y_pred_model, classifier, score, round(t, 2), matrix, report
+    return y_pred_model, classifier, test_score, train_score, round(t, 2), matrix, report
 
 
-def plot_learning_curve(algorithm, X_train, X_test, y_train, y_test):
+def plot_learning_curve(algorithm, train_path, test_path, predict_path):
     train_score = []
     test_score = []
-    for i in range(0, len(X_train)-5):
-        algorithm.fit(X_train, y_train)
-        y_train_predict = algorithm.predict(X_train[:i])
-        train_score.append(mean_squared_error(y_train[:i], y_train_predict))
-        y_test_predict = algorithm.predict(X_test)
-        test_score.append(mean_squared_error(y_test, y_test_predict))
-    plt.plot([i for i in range(1, len(X_train) + 1)], np.sqrt(train_score), label='Train')
-    plt.plot([i for i in range(1, len(X_train) + 1)], np.sqrt(test_score), label='Test')
-    plt.legend()
-    plt.axis([0, len(X_train) + 1, 0, 4])
-    plt.show()
+    X = ["10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"]
+    x_train_count, x_test_count, y_train_le, y_test_le = convert_to_matrix(train_path, test_path, predict_path)
+    for i in range(10):
+        if i == 9:
+            result = get_text_classification(algorithm, x_train_count[::10 - i], y_train_le[::10 - i],
+                                             x_test_count[::10 - i], y_test_le[::10 - i], saveModel=True)
+        else:
+            result = get_text_classification(algorithm, x_train_count[::10 - i], y_train_le[::10 - i],
+                                             x_test_count[::10 - i], y_test_le[::10 - i], saveModel=False)
+        train_score.append(result[3])
+        test_score.append(result[2])
+    print(train_score)
+    print(test_score)
+    data_visualization.plot_learning_curves(train_score, test_score, X, str(algorithm).split('(')[0])
 
 
 def train_model(algorithm, train_path, test_path, predict_path):
@@ -202,27 +209,43 @@ def save_model(model, accuracy):
     joblib.dump(model, file_path)
 
 
-def predict(model_path, train_path, test_path, predict_path, store_path):
+def predict(model_paths, train_path, test_path, predict_path, store_path):
     """
-    :param model_path: 模型路径
+    :param model_paths: 模型路径,list, 按准确率从大到小排练
     :param train_path: 训练集路径
     :param test_path: 测试集路径
     :param predict_path: 要预测的数据路径
     :param store_path: 预测结果存储路径
     :return:
     """
-    model = joblib.load(model_path)
+    # print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 正在加载第 1 个模型...")
+    model_0 = joblib.load(model_paths[0])
+    # print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 正在加载第 2 个模型...")
+    # model_1 = joblib.load(model_paths[1])
+    # print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 正在加载第 3 个模型...")
+    # model_2 = joblib.load(model_paths[2])
+    print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 模型加载完成，正在预测...")
     x_train, y_train = merge_text(train_path)
     x_test, y_test = merge_text(test_path)
+    # x_predict_0, y_predicted_0 = merge_text("temp/rmrb")
     x_predict, y_predict = merge_text(predict_path)
     count = CountVectorizer()
     count.fit(list(x_train) + list(x_test) + list(x_predict))
     x_predict_count = count.transform(x_predict).toarray()
-    y_predicted = model.predict(x_predict_count)
+    # print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 正在使用第 1 个模型预测...")
+    y_predicted = model_0.predict(x_predict_count)
+    # print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 正在使用第 2 个模型预测...")
+    # y_predicted_1 = model_1.predict(x_predict_count)
+    # print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 正在使用第 3 个模型预测...")
+    # y_predicted_2 = model_2.predict(x_predict_count)
+    # y_predicted = []
+    # print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 合并预测结果。")
+    # for i in range(len(y_predicted_0)):
+    #     if y_predicted_1[i] == y_predicted_2[i]:
+    #         y_predicted.append(y_predicted_1[i])
+    #     else:
+    #         y_predicted.append(y_predicted_0[i])
     print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 预测结束，开始写入文件...")
-    # print(x_predict)
-    # for i in y_predicted:
-    #     print(num_to_label[i], end=" ")
 
     file_list = os.listdir(predict_path)
     y_predicted_count = 0
@@ -246,18 +269,19 @@ def predict(model_path, train_path, test_path, predict_path, store_path):
         print("[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]: 写入完成: " + store_path + "/" + file)
 
 
-def predict_one_news(news_keywords):
+def predict_one_news(news_keywords, model=None):
+    # 此函数用于模型训练好以后随机测试一篇新闻评论
     """
-    此函数用于模型训练好以后随机测试一篇新闻评论
     :param news_keywords: 一则新闻评论关键词，空格隔开，字符串
-    :return:
+    :return: num_to_label[y_predicted[0]]: 关键词对应情绪
     """
     model_path = "model/1611320988907-LogisticRegression-52%.m"
     train_path = "train/rmrb"
     test_path = "test/rmrb"
     predict_path = "temp/rmrb"
 
-    model = joblib.load(model_path)
+    if model is None:
+        model = joblib.load(model_path)
     x_train, y_train = merge_text(train_path)
     x_test, y_test = merge_text(test_path)
     x_predict, y_predict = merge_text(predict_path)
@@ -269,10 +293,10 @@ def predict_one_news(news_keywords):
 
 
 if __name__ == '__main__':
-    train_path = "train/rmrb"
-    test_path = "test/rmrb"
-    predict_path = "temp/rmrb"
-    store_path = "predicted/rmrb"
+    train_path = "train/xlxw"
+    test_path = "test/xlxw"
+    predict_path = "filtered/xlxw"
+    store_path = "predicted/xlxw(4)"
 
     # features, labels = merge_text(train_path)
     # features1, labels1 = merge_text(test_path)
@@ -284,64 +308,43 @@ if __name__ == '__main__':
     # # print(labels)
     # print(set(labels1))
 
-    # x_train_count, x_test_count, y_train_le, y_test_le = convert_to_matrix(train_path, test_path)
-    # print(x_test_count)
-    # print(x_test_count)
-    # print(num_to_label[y_train_le[2]])
-    # print(y_test_le)
-
     # k 近邻算法
     # algorithm = KNeighborsClassifier()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 决策树
     # algorithm = DecisionTreeClassifier()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 多层感知器
     # algorithm = MLPClassifier()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 伯努力贝叶斯算法
     # algorithm = BernoulliNB()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 高斯贝叶斯
     # algorithm = GaussianNB()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 多项式朴素贝叶斯
     # algorithm = MultinomialNB()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 逻辑回归算法
-    # algorithm = LogisticRegression()
+    algorithm = LogisticRegression()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 支持向量机算法
-    # algorithm = svm.SVC()
+    # algorithm = svm.SVC(kernel='linear')
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 随机森林算法
     # algorithm = RandomForestClassifier()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # 自增强算法
     # algorithm = AdaBoostClassifier()
+    # train_model(algorithm, train_path, test_path, predict_path)
     # lightgbm算法
     # algorithm = lightgbm.LGBMClassifier()
-    # xgboost算法
-    # algorithm = xgboost.XGBClassifier()
     # train_model(algorithm, train_path, test_path, predict_path)
-    # predict("model/1611320988907-LogisticRegression-52%.m", train_path, test_path, predict_path, store_path)
+    # xgboost算法
+    # algorithm = xgboost.XGBClassifier(objective="multi：softmax  num_class=16")
+    # train_model(algorithm, train_path, test_path, predict_path)
+    # plot_learning_curve(algorithm, train_path, test_path, predict_path)
+    # predict(["model/1611464257925-LogisticRegression-75%.m"], train_path, test_path, predict_path, store_path)
+    predict(["model/1611583839453-LogisticRegression-72%.m"], train_path, test_path, predict_path, store_path)
 
-    # mood = predict_one_news(" ".join(
-    #     ["早安", "一周", "加油", "思维", "早上好", "努力", "惯性", "换个", "一天", "成长", "限制", "角度", "拖延", "物质", "角度看", "能力", "周一", "坚持",
-    #      "无聊", "提升", "继续"]))
-    # print(mood)
-    mood = predict_one_news(" ".join(
-        [
-            "加油",
-            "北京",
-            "返校",
-            "毕业生",
-            "高校",
-            "口罩",
-            "行李",
-            "防控",
-            "疫情",
-            "一定",
-            "希望",
-            "严防死守",
-            "不能",
-            "严防",
-            "已经",
-            "学校",
-            "首都",
-            "推迟",
-            "进口",
-            "要求"
-        ]))
-    print(mood)
